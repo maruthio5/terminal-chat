@@ -53,7 +53,7 @@ crons.interval(
 );
 crons.interval(
   "purge disappearing messages",
-  { minutes: 1 },
+  { minutes: 5 },
   internal.crons.purgeExpiredMessages,
 );
 
