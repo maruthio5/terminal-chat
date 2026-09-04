@@ -19,6 +19,7 @@ export async function uploadMedia(
   generateUploadUrl: ReturnType<typeof useMutation<typeof api.media.generateUploadUrl>>,
   registerUpload: ReturnType<typeof useMutation<typeof api.media.registerUpload>>,
   file: File,
+  meta?: { width?: number; height?: number; durationMs?: number },
 ): Promise<string> {
   if (file.size > MAX_UPLOAD_BYTES) {
     throw new Error("Files are limited to 10 MB");
@@ -37,6 +38,9 @@ export async function uploadMedia(
     mimeType: file.type || "application/octet-stream",
     size: file.size,
     storageId: storageId as never,
+    width: meta?.width,
+    height: meta?.height,
+    durationMs: meta?.durationMs,
   });
   return mediaId;
 }

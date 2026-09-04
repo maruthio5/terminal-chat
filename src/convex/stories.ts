@@ -58,6 +58,7 @@ export const feed = query({
           text: string | null;
           background: string | null;
           mediaId: string | null;
+          mediaUrl: string | null;
           createdAt: number;
           expiresAt: number;
           viewedByMe: boolean;
@@ -66,9 +67,19 @@ export const feed = query({
       }
     >();
 
+    const mediaUrlCache = new Map<Id<"media">, string | null>();
+
     for (const s of all) {
       const author = await ctx.db.get(s.authorId);
       if (!author) continue;
+      let mediaUrl: string | null = null;
+      if (s.mediaId) {
+        if (!mediaUrlCache.has(s.mediaId)) {
+          const doc = await ctx.db.get(s.mediaId);
+          mediaUrlCache.set(s.mediaId, doc ? ((await ctx.storage.getUrl(doc.storageId)) ?? null) : null);
+        }
+        mediaUrl = mediaUrlCache.get(s.mediaId) ?? null;
+      }
       const key = s.authorId;
       if (!groups.has(key)) {
         groups.set(key, {
@@ -92,6 +103,7 @@ export const feed = query({
         text: s.text ?? null,
         background: s.background ?? null,
         mediaId: s.mediaId ?? null,
+        mediaUrl,
         createdAt: s.createdAt,
         expiresAt: s.expiresAt,
         viewedByMe: myViews.has(s._id),
